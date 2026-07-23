@@ -3,8 +3,7 @@ import express from 'express';
 import cors from 'cors';
 import { DbConnect, disconnectDB } from './config/db.js';
 import rateLimit from 'express-rate-limit';
-
-import menuRoutes from "./routes/menu.routes.js"
+import menuRoutes from './routes/menu.routes.js';
 
 const app = express();
 
@@ -12,27 +11,21 @@ app.use(cors({
     origin: process.env.CLIENT_URL,
     credentials: true,
 }));
-// const limiter = rateLimit({
-//     windowMs: 60 * 1000, //1 min
-//     max: 2,
-//     standardHeaders: true,    // sends RateLimit-* headers so client knows their status
-//     legacyHeaders: true,     // disables old X-RateLimit-* headers
-//     message: { error: 'Too many requests, please try again later.' },
-// });
+
 const publicLimiter = rateLimit({ windowMs: 60_000, max: 60 });
 
 app.use(express.json());
 
 app.use('/api/v1/get/menu', publicLimiter, menuRoutes);
 
-app.get('/', publicLimiter, (req, res) => {
-    res.send("running");
+app.get('/', publicLimiter, (_req, res) => {
+    res.send('running');
 });
 
 const PORT = process.env.PORT || 5000;
-let server;
+let server: ReturnType<typeof app.listen>;
 
-const startServer = async () => {
+const startServer = async (): Promise<void> => {
     try {
         await DbConnect();
         server = app.listen(PORT, () => {
@@ -44,7 +37,7 @@ const startServer = async () => {
     }
 };
 
-const shutdown = async (signal) => {
+const shutdown = async (signal: string): Promise<void> => {
     console.log(`${signal} received, shutting down gracefully`);
     if (server) server.close();
     await disconnectDB();
