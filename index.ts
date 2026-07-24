@@ -4,6 +4,7 @@ import cors from 'cors';
 import { DbConnect, disconnectDB } from './config/db.js';
 import rateLimit from 'express-rate-limit';
 import menuRoutes from './routes/menu.routes.js';
+import { errorHandler } from './middleware/errorHandler.js';
 
 const app = express();
 
@@ -21,6 +22,8 @@ app.use('/api/v1/get/menu', publicLimiter, menuRoutes);
 app.get('/', publicLimiter, (_req, res) => {
     res.send('running');
 });
+
+app.use(errorHandler);
 
 const PORT = process.env.PORT || 5000;
 let server: ReturnType<typeof app.listen>;
