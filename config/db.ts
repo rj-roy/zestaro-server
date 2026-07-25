@@ -11,6 +11,7 @@ const client = new MongoClient(process.env.MONGO_URI!, {
 
 interface Collections {
     menuCollection: Collection;
+    cartCollection: Collection;
 }
 
 let db: Db | null = null;
@@ -30,12 +31,12 @@ export const DbConnect = async (): Promise<{ db: Db; collections: Collections }>
         if (!dbName) throw new Error('DB_NAME environment variable is not set');
 
         db = client.db(dbName);
-
-        const collectionName = process.env.MENU_COLLECTION;
-        if (!collectionName) throw new Error('MENU_COLLECTION environment variable is not set');
+        // const collectionName = process.env.MENU_COLLECTION;
+        // if (!collectionName) throw new Error('MENU_COLLECTION environment variable is not set');
 
         collections = {
-            menuCollection: db.collection(collectionName),
+            menuCollection: db.collection(process.env.MENU_COLLECTION!),
+            cartCollection: db.collection(process.env.CART_COLLECTION!),
         };
 
         console.log('DB Connected');

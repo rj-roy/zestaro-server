@@ -3,8 +3,10 @@ import express from 'express';
 import cors from 'cors';
 import { DbConnect, disconnectDB } from './config/db.js';
 import rateLimit from 'express-rate-limit';
-import menuRoutes from './routes/menu.routes.js';
 import { errorHandler } from './middleware/errorHandler.js';
+
+import menuRoutes from './routes/menu.routes.js';
+import cartRoutes from './routes/cart.routes.js'
 
 const app = express();
 
@@ -14,10 +16,12 @@ app.use(cors({
 }));
 
 const publicLimiter = rateLimit({ windowMs: 60_000, max: 60 });
+const postLimiter = rateLimit({ windowMs: 60_000, max: 3 });
 
 app.use(express.json());
 
 app.use('/api/v1/get/menu', publicLimiter, menuRoutes);
+app.use('/api/v1/cart', postLimiter, cartRoutes);
 
 app.get('/', publicLimiter, (_req, res) => {
     res.send('running');
