@@ -46,3 +46,56 @@ export const createCart = async (req: Request, res: Response): Promise<void> => 
         throw new ApiError(500, "Failed to add item to cart");
     };
 };
+
+export const getCartByUser = async (req: Request, res: Response): Promise<void> => {
+    const userId = req.params.id;
+    if (!userId) throw new ApiError(404, "User Not Found!");
+
+    const { cartCollection } = getCollections();
+
+    const [result] = await cartCollection.aggregate([
+        { $match: { userId } },
+        {
+            $project: {
+                _id: 0,
+                cartItemIds: {
+                    $map: {
+                        input: "$cart",
+                        as: "item",
+                        in: "$$item.itemId",
+                    },
+                },
+            },
+        },
+    ]).toArray();
+
+
+    // const addedItems = await cartCollection.findOne(
+    //     { userId },
+    //     {
+    //         projection: {
+    //             _id: 0,
+    //             "cart.itemId": 1,
+    //         },
+    //     },
+    // )
+
+    // const result = { cartItemIds: addedItems?.cart?.map((item: { itemId: any; }) => item.itemId) ?? [] }
+
+    ApiResponse.success(res, "Added cart items", result, 201)
+};
+
+export const getAnsIfItemInCart = async (req: Request, res: Response): Promise<void> => {
+    const { userId, itemId } = req.query;
+    if (!userId || !itemId) {
+        throw new ApiError(404, "User not found");
+    };
+
+    const { cartCollection } = getCollections();
+
+    const result = (await cartCollection.countDocuments({
+        userId,
+        "cart.itemId": itemId,
+    })) > 0;
+    res.send(result);
+};

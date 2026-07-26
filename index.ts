@@ -2,11 +2,11 @@ import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
 import { DbConnect, disconnectDB } from './config/db.js';
-import rateLimit from 'express-rate-limit';
 import { errorHandler } from './middleware/errorHandler.js';
 
 import menuRoutes from './routes/menu.routes.js';
 import cartRoutes from './routes/cart.routes.js'
+import { publicLimiter } from './middleware/rateLimiter.js';
 
 const app = express();
 
@@ -15,13 +15,10 @@ app.use(cors({
     credentials: true,
 }));
 
-const publicLimiter = rateLimit({ windowMs: 60_000, max: 60 });
-const postLimiter = rateLimit({ windowMs: 60_000, max: 3 });
-
 app.use(express.json());
 
 app.use('/api/v1/get/menu', publicLimiter, menuRoutes);
-app.use('/api/v1/cart', postLimiter, cartRoutes);
+app.use('/api/v1/cart', cartRoutes);
 
 app.get('/', publicLimiter, (_req, res) => {
     res.send('running');
