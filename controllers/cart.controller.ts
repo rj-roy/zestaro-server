@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { getCollections } from "../config/db.js";
 import { ApiResponse } from "../utils/ApiRsponse.js";
 import { ApiError } from "../utils/ApiError.js";
+import { validateObjectId } from "../utils/validateObjectId.js";
 
 export const createCart = async (req: Request, res: Response): Promise<void> => {
     try {
@@ -62,25 +63,15 @@ export const getCartByUser = async (req: Request, res: Response): Promise<void> 
                     $map: {
                         input: "$cart",
                         as: "item",
-                        in: "$$item.itemId",
+                        in: {
+                            itemId: "$$item.itemId",
+                            itemName: "$$item.itemName",
+                        },
                     },
                 },
             },
         },
     ]).toArray();
-
-
-    // const addedItems = await cartCollection.findOne(
-    //     { userId },
-    //     {
-    //         projection: {
-    //             _id: 0,
-    //             "cart.itemId": 1,
-    //         },
-    //     },
-    // )
-
-    // const result = { cartItemIds: addedItems?.cart?.map((item: { itemId: any; }) => item.itemId) ?? [] }
 
     ApiResponse.success(res, "Added cart items", result, 201)
 };
@@ -98,4 +89,25 @@ export const getAnsIfItemInCart = async (req: Request, res: Response): Promise<v
         "cart.itemId": itemId,
     })) > 0;
     res.send(result);
+};
+
+export const getCartItemCount = async (req: Request, res: Response): Promise<void> => {
+    const userId = validateObjectId(req.params.id, "userId");
+    if (!userId) {
+        throw new ApiError(404, "User Not Found!");
+    };
+
+    const { cartCollection } = getCollections();
+    const result = await cartCollection.aggregate([
+        { $match: { userId } },
+        {
+            $project: {
+                itemCount: { $size: "$cart" },
+            },
+        },
+    ]).toArray();
+
+    const itemCount = result[0]?.itemCount ?? 0;
+
+    ApiResponse.success(res, "How many cartItems", { itemCount: itemCount }, 201);
 };
