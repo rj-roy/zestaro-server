@@ -4,7 +4,7 @@ import { postLimiter, publicLimiter } from "../middleware/rateLimiter.js";
 
 const router = Router();
 
-router.post('/create', postLimiter, createCart);
+router.post('/create', createCart);
 router.get('/get/items', publicLimiter, getCartByUser);
 router.get('/get/item/exist', getAnsIfItemInCart);
 router.get('/get/item/count/:id', getCartItemCount);

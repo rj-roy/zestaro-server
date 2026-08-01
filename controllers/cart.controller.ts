@@ -3,6 +3,7 @@ import { getCollections } from "../config/db.js";
 import { ApiResponse } from "../utils/ApiRsponse.js";
 import { ApiError } from "../utils/ApiError.js";
 import { validateObjectId } from "../utils/validateObjectId.js";
+import { toArray } from "../utils/helper/toArray.js";
 
 export const createCart = async (req: Request, res: Response): Promise<void> => {
     try {
@@ -12,7 +13,7 @@ export const createCart = async (req: Request, res: Response): Promise<void> => 
             throw new ApiError(505, "Something Went Wrong! Please Try again. User not found!");
         };
 
-        const cart = [JSON.parse(checkedItem), ...(localCart ? JSON.parse(localCart) : [])];
+        const cart = [...toArray(checkedItem), ...toArray(localCart)];
         const { cartCollection } = getCollections();
         const isExistCart = await cartCollection.findOne({ userId });
 
