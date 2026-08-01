@@ -49,23 +49,43 @@ export const createCart = async (req: Request, res: Response): Promise<void> => 
 };
 
 export const getCartByUser = async (req: Request, res: Response): Promise<void> => {
-    const userId = req.params.id;
+    const { userId, mode } = req.query
     if (!userId) throw new ApiError(404, "User Not Found!");
 
     const { cartCollection } = getCollections();
+
+    if (mode === "count") {
+        const [result] = await cartCollection.aggregate([
+            { $match: { userId } },
+            {
+                $project: {
+                    _id: 0,
+                    cartLength: {
+                        $size: "$cart",
+                    },
+                    totalPrice: {
+                        $sum: "$cart.itemPrice",
+                    },
+                },
+            },
+        ]).toArray();
+        ApiResponse.success(res, "Added cart count", result, 201);
+        return;
+    };
 
     const [result] = await cartCollection.aggregate([
         { $match: { userId } },
         {
             $project: {
                 _id: 0,
-                cartItemIds: {
+                cartItems: {
                     $map: {
                         input: "$cart",
                         as: "item",
                         in: {
                             itemId: "$$item.itemId",
                             itemName: "$$item.itemName",
+                            itemPrice: "$$item.itemPrice",
                         },
                     },
                 },
