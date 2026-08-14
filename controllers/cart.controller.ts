@@ -8,6 +8,7 @@ import { toArray } from "../utils/helper/toArray.js";
 export const createCart = async (req: Request, res: Response): Promise<void> => {
     try {
         const { userId, userName, checkedItem, localCart } = req.body;
+        console.log(req.body);
 
         if (!userId || !userName) {
             throw new ApiError(505, "Something Went Wrong! Please Try again. User not found!");
@@ -87,6 +88,7 @@ export const getCartByUser = async (req: Request, res: Response): Promise<void> 
                             itemId: "$$item.itemId",
                             itemName: "$$item.itemName",
                             itemPrice: "$$item.itemPrice",
+                            quantity: "$$item.quantity",
                         },
                     },
                 },

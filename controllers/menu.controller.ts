@@ -39,7 +39,7 @@ export const getMenuByQuery = async (req: Request, res: Response): Promise<void>
         const totalDoc = await menuCollection.countDocuments(query);
         const totalPages = Math.ceil(totalDoc / limit);
 
-        const result = await menuCollection.find(query).skip(toSkip).limit(limit).sort({ createdAt: -1 }).toArray();
+        const result = await menuCollection.find(query).skip(toSkip).limit(limit).sort({ _id: 1 }).toArray();
 
         res.setHeader("X-Total-Pages", totalPages.toString());
         res.setHeader("X-Total-Count", totalDoc.toString());
