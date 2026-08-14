@@ -4,6 +4,7 @@ import { ApiResponse } from "../utils/ApiRsponse.js";
 import { ApiError } from "../utils/ApiError.js";
 import { validateObjectId } from "../utils/validateObjectId.js";
 import { toArray } from "../utils/helper/toArray.js";
+import { ObjectId } from "mongodb";
 
 export const createCart = async (req: Request, res: Response): Promise<void> => {
     try {
@@ -132,4 +133,36 @@ export const getCartItemCount = async (req: Request, res: Response): Promise<voi
     const itemCount = result[0]?.itemCount ?? 0;
 
     ApiResponse.success(res, "How many cartItems", { itemCount: itemCount }, 201);
+};
+
+export const updateQuantity = async (req: Request, res: Response) => {
+    const { userId, itemId, updatedQuantity } = req.body;
+    if(!userId || !ObjectId.isValid(userId)){
+        throw new ApiError(400, "Invalid User");
+    };
+
+    if (!itemId || !updatedQuantity) {
+        throw new ApiError(400, "Item ID and Quantity is requred");
+    };
+
+    const { cartCollection } = getCollections();
+
+    const result = await cartCollection.findOneAndUpdate(
+        {
+            userId,
+            "cart.itemId": itemId,
+        },
+        {
+            $set: {
+                "cart.$.quantity": Number(updatedQuantity)
+            }
+        },
+        {returnDocument: "after"},
+    );
+
+    if(!result){
+        ApiResponse.error(res, "Something Went Wrong! Please try again.")
+    }
+
+    ApiResponse.success(res, "Quantity Updated")
 };
