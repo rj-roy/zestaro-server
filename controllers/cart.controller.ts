@@ -51,7 +51,7 @@ export const createCart = async (req: Request, res: Response): Promise<void> => 
 };
 
 export const getCartByUser = async (req: Request, res: Response): Promise<void> => {
-    const { userId, mode } = req.query
+    const { userId, mode, image } = req.query
     if (!userId) throw new ApiError(404, "User Not Found!");
 
     const { cartCollection } = getCollections();
@@ -88,6 +88,8 @@ export const getCartByUser = async (req: Request, res: Response): Promise<void> 
                             itemId: "$$item.itemId",
                             itemName: "$$item.itemName",
                             itemPrice: "$$item.itemPrice",
+                            itemDesc: "$$item.itemDesc",
+                            imageUrl: "$$item.imageUrl",
                             quantity: "$$item.quantity",
                         },
                     },
