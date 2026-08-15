@@ -137,7 +137,7 @@ export const getCartItemCount = async (req: Request, res: Response): Promise<voi
 
 export const updateQuantity = async (req: Request, res: Response) => {
     const { userId, itemId, updatedQuantity } = req.body;
-    if(!userId || !ObjectId.isValid(userId)){
+    if (!userId || !ObjectId.isValid(userId)) {
         throw new ApiError(400, "Invalid User");
     };
 
@@ -157,12 +157,51 @@ export const updateQuantity = async (req: Request, res: Response) => {
                 "cart.$.quantity": Number(updatedQuantity)
             }
         },
-        {returnDocument: "after"},
+        { returnDocument: "after" },
     );
 
-    if(!result){
+    if (!result) {
         ApiResponse.error(res, "Something Went Wrong! Please try again.")
     }
 
     ApiResponse.success(res, "Quantity Updated")
+};
+
+export const removeCartItem = async (req: Request, res: Response) => {
+    const { userId, itemId } = req.body;
+
+    if (!userId || !ObjectId.isValid(userId)) {
+        throw new ApiError(404, "User not found!");
+    };
+
+    if (!itemId || !ObjectId.isValid(itemId)) {
+        throw new ApiError(404, "Item no found!");
+    };
+
+    const { cartCollection } = getCollections();
+
+    const result = await cartCollection.updateOne(
+        { userId, },
+        [
+            {
+                $set: {
+                    cart: {
+                        $filter: {
+                            input: "$cart",
+                            as: "item",
+                            cond: {
+                                $ne: ["$$item.itemId", itemId],
+                            },
+                        },
+                    },
+                },
+            },
+        ],
+    );
+
+    if (!result) {
+        ApiResponse.error(res, "Failed To Remove!");
+    };
+
+    ApiResponse.success(res, "Item removed successfully!");
 };
