@@ -12,6 +12,7 @@ const client = new MongoClient(process.env.MONGO_URI!, {
 interface Collections {
     menuCollection: Collection;
     cartCollection: Collection;
+    checkoutCollection: Collection;
 }
 
 let db: Db | null = null;
@@ -37,6 +38,7 @@ export const DbConnect = async (): Promise<{ db: Db; collections: Collections }>
         collections = {
             menuCollection: db.collection(process.env.MENU_COLLECTION!),
             cartCollection: db.collection(process.env.CART_COLLECTION!),
+            checkoutCollection: db.collection(process.env.CHECKOUT_COLLECTION!),
         };
 
         console.log('DB Connected');
