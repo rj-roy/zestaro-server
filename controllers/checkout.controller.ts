@@ -21,6 +21,8 @@ export const createCheckout = async (req: Request, res: Response) => {
 
         const { checkoutCollection, cartCollection } = getCollections();
 
+        //duplicate && get price
+
         const result = await checkoutCollection.insertOne({
             fullName, address, contact, note, userId, userName, orderedItems,
             createdAt: new Date(),
