@@ -1,13 +1,13 @@
 import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
-import { DbConnect, disconnectDB } from './src/config/db.js';
-import { errorHandler } from './src/middleware/errorHandler.js';
-import { publicLimiter } from './src/middleware/rateLimiter.js';
+import { DbConnect, disconnectDB } from './config/db.js';
+import { errorHandler } from './middleware/errorHandler.js';
+import { publicLimiter } from './middleware/rateLimiter.js';
 
-import menuRoutes from './src/routes/menu.routes.js';
-import cartRoutes from './src/routes/cart.routes.js';
-import checkoutRoutes from './src/routes/checkout.routes.js';
+import menuRoutes from './routes/menu.routes.js';
+import cartRoutes from './routes/cart.routes.js';
+import checkoutRoutes from './routes/checkout.routes.js';
 
 const app = express();
 
