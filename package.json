@@ -5,11 +5,11 @@
   "license": "ISC",
   "author": "rj-roy",
   "type": "module",
-  "main": "index.ts",
+  "main": "./src/app.ts",
   "scripts": {
     "build": "tsc",
-    "dev": "nodemon --watch '*.ts' --ext ts --exec tsx index.ts",
-    "start": "node dist/index.js"
+    "dev": "nodemon",
+    "start": "node dist/server.js"
   },
   "dependencies": {
     "cors": "^2.8.6",
