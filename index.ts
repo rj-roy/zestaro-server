@@ -3,10 +3,11 @@ import express from 'express';
 import cors from 'cors';
 import { DbConnect, disconnectDB } from './config/db.js';
 import { errorHandler } from './middleware/errorHandler.js';
+import { publicLimiter } from './middleware/rateLimiter.js';
 
 import menuRoutes from './routes/menu.routes.js';
-import cartRoutes from './routes/cart.routes.js'
-import { publicLimiter } from './middleware/rateLimiter.js';
+import cartRoutes from './routes/cart.routes.js';
+import checkoutRoutes from './routes/checkout.routes.js';
 
 const app = express();
 
@@ -19,6 +20,7 @@ app.use(express.json());
 
 app.use('/api/v1/get/menu', publicLimiter, menuRoutes);
 app.use('/api/v1/cart', cartRoutes);
+app.use('/api/v1/checkout', checkoutRoutes);
 
 app.get('/', publicLimiter, (_req, res) => {
     res.send('running');

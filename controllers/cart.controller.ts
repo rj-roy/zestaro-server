@@ -4,6 +4,7 @@ import { ApiResponse } from "../utils/ApiRsponse.js";
 import { ApiError } from "../utils/ApiError.js";
 import { validateObjectId } from "../utils/validateObjectId.js";
 import { toArray } from "../utils/helper/toArray.js";
+import { ObjectId } from "mongodb";
 
 export const createCart = async (req: Request, res: Response): Promise<void> => {
     try {
@@ -50,7 +51,7 @@ export const createCart = async (req: Request, res: Response): Promise<void> => 
 };
 
 export const getCartByUser = async (req: Request, res: Response): Promise<void> => {
-    const { userId, mode } = req.query
+    const { userId, mode, image } = req.query
     if (!userId) throw new ApiError(404, "User Not Found!");
 
     const { cartCollection } = getCollections();
@@ -87,6 +88,8 @@ export const getCartByUser = async (req: Request, res: Response): Promise<void> 
                             itemId: "$$item.itemId",
                             itemName: "$$item.itemName",
                             itemPrice: "$$item.itemPrice",
+                            itemDesc: "$$item.itemDesc",
+                            imageUrl: "$$item.imageUrl",
                             quantity: "$$item.quantity",
                         },
                     },
@@ -132,4 +135,75 @@ export const getCartItemCount = async (req: Request, res: Response): Promise<voi
     const itemCount = result[0]?.itemCount ?? 0;
 
     ApiResponse.success(res, "How many cartItems", { itemCount: itemCount }, 201);
+};
+
+export const updateQuantity = async (req: Request, res: Response) => {
+    const { userId, itemId, updatedQuantity } = req.body;
+    if (!userId || !ObjectId.isValid(userId)) {
+        throw new ApiError(400, "Invalid User");
+    };
+
+    if (!itemId || !updatedQuantity) {
+        throw new ApiError(400, "Item ID and Quantity is requred");
+    };
+
+    const { cartCollection } = getCollections();
+
+    const result = await cartCollection.findOneAndUpdate(
+        {
+            userId,
+            "cart.itemId": itemId,
+        },
+        {
+            $set: {
+                "cart.$.quantity": Number(updatedQuantity)
+            }
+        },
+        { returnDocument: "after" },
+    );
+
+    if (!result) {
+        ApiResponse.error(res, "Something Went Wrong! Please try again.")
+    }
+
+    ApiResponse.success(res, "Quantity Updated")
+};
+
+export const removeCartItem = async (req: Request, res: Response) => {
+    const { userId, itemId } = req.body;
+
+    if (!userId || !ObjectId.isValid(userId)) {
+        throw new ApiError(404, "User not found!");
+    };
+
+    if (!itemId || !ObjectId.isValid(itemId)) {
+        throw new ApiError(404, "Item no found!");
+    };
+
+    const { cartCollection } = getCollections();
+
+    const result = await cartCollection.updateOne(
+        { userId, },
+        [
+            {
+                $set: {
+                    cart: {
+                        $filter: {
+                            input: "$cart",
+                            as: "item",
+                            cond: {
+                                $ne: ["$$item.itemId", itemId],
+                            },
+                        },
+                    },
+                },
+            },
+        ],
+    );
+
+    if (!result) {
+        ApiResponse.error(res, "Failed To Remove!");
+    };
+
+    ApiResponse.success(res, "Item removed successfully!");
 };

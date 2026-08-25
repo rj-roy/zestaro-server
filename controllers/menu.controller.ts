@@ -2,6 +2,7 @@ import type { Request, Response } from 'express';
 import { getCollections } from '../config/db.js';
 import { ApiError } from '../utils/ApiError.js';
 import { ApiResponse } from '../utils/ApiRsponse.js';
+import { ObjectId } from 'mongodb';
 
 export const getMenu = async (_req: Request, res: Response): Promise<void> => {
     try {
@@ -55,4 +56,37 @@ export const getMenuByQuery = async (req: Request, res: Response): Promise<void>
         if (error instanceof ApiError) throw error;
         throw new ApiError(500, 'Failed to fetch menu');
     }
+};
+
+export const getItemPriceByCart = async (req: Request, res: Response) => {
+    const itemsId = req.body;
+    const ids = itemsId.map((item: { itemId: string }) => {
+        if (!ObjectId.isValid(item.itemId)) {
+            throw new ApiError(400, "Invalid item details, failed to process!")
+        };
+        return new ObjectId(item.itemId)
+    });
+
+    const { menuCollection } = getCollections();
+
+    const result = await menuCollection.find(
+        { _id: { $in: ids } },
+        { projection: { price: 1 } }
+    ).toArray();
+
+    if (result.length === 0) {
+        throw new ApiError(400, "Failed to get price! Order could not be processed.");
+    };
+
+    if (result.length !== itemsId.length) {
+        throw new ApiError(404, "One or more item couldn't found!");
+    };
+
+    const total = result.reduce((sum, item) => sum + item.price, 0);
+
+    if (total <= 0) {
+        throw new ApiError(400, "Failed to get price! Order could not be processed.");
+    };
+
+    ApiResponse.success(res, "Price received", total);
 };
