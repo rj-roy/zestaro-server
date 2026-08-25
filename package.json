@@ -9,7 +9,7 @@
   "scripts": {
     "build": "tsc",
     "dev": "nodemon",
-    "start": "node dist/app.js"
+    "start": "node dist/server.js"
   },
   "dependencies": {
     "cors": "^2.8.6",

@@ -28,29 +28,31 @@ app.get('/', publicLimiter, (_req, res) => {
 
 app.use(errorHandler);
 
-const PORT = process.env.PORT || 5000;
-let server: ReturnType<typeof app.listen>;
+export default app;
 
-const startServer = async (): Promise<void> => {
-    try {
-        await DbConnect();
-        server = app.listen(PORT, () => {
-            console.log(`Server is running on port ${PORT}`);
-        });
-    } catch (error) {
-        console.log('Failed to start Server', error);
-        process.exit(1);
-    }
-};
+// const PORT = process.env.PORT || 5000;
+// let server: ReturnType<typeof app.listen>;
 
-const shutdown = async (signal: string): Promise<void> => {
-    console.log(`${signal} received, shutting down gracefully`);
-    if (server) server.close();
-    await disconnectDB();
-    process.exit(0);
-};
+// const startServer = async (): Promise<void> => {
+//     try {
+//         await DbConnect();
+//         server = app.listen(PORT, () => {
+//             console.log(`Server is running on port ${PORT}`);
+//         });
+//     } catch (error) {
+//         console.log('Failed to start Server', error);
+//         process.exit(1);
+//     }
+// };
 
-process.on('SIGINT', () => shutdown('SIGINT'));
-process.on('SIGTERM', () => shutdown('SIGTERM'));
+// const shutdown = async (signal: string): Promise<void> => {
+//     console.log(`${signal} received, shutting down gracefully`);
+//     if (server) server.close();
+//     await disconnectDB();
+//     process.exit(0);
+// };
 
-startServer();
+// process.on('SIGINT', () => shutdown('SIGINT'));
+// process.on('SIGTERM', () => shutdown('SIGTERM'));
+
+// startServer();
