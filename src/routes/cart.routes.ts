@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { createCart, getAnsIfItemInCart, getCartByUser, getCartItemCount, removeCartItem, updateQuantity } from "../controllers/cart.controller.js";
-import { cartUQLimiter, postLimiter, publicLimiter } from "../middleware/rateLimiter.js";
+import { postLimiter, publicLimiter } from "../middleware/rateLimiter.js";
 
 const router = Router();
 
